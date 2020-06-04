@@ -152,28 +152,33 @@ class ReduxCounter extends React.Component {
   componentWillMount() {
     let data2 = [];
     for (let i = 0; i < 50; i++) {
-      let newKeys= {};
+      let newKeys = {};
       const refData = usersData.map(ele => {
-        for(let j = 0; j < 100; j++) {
-          newKeys[`newKey-${j}`] = `newKey-${j}`
+        for (let j = 0; j < 100; j++) {
+          newKeys[`newKey-${j}`] = `newKey-${j}`;
         }
-       return ({
-        ...ele, id: `${ele.id}-${i}`, ...newKeys, arrKey: [{id: 1, type: "spree"}, {id:2, type: "spree"}, {id:3, type:"spree"}, {id:4, type:"spree"}], objKey: {a: 1, b:2, c:3, d:4, e:5}
-       }) 
-      })
-      data2 = [...data2, ...refData]
+        return {
+          ...ele,
+          id: `${ele.id}-${i}`,
+          ...newKeys,
+          arrKey: [
+            { id: 1, type: "spree" },
+            { id: 2, type: "spree" },
+            { id: 3, type: "spree" },
+            { id: 4, type: "spree" }
+          ],
+          objKey: { a: 1, b: 2, c: 3, d: 4, e: 5 }
+        };
+      });
+      data2 = [...data2, ...refData];
     }
-    console.log('data2 :>> ', data2);
+    console.log("data2 :>> ", data2);
     this.props.updateUsers(GenerateUserData(data2));
-    console.log("Before redux-counter",performance.now());
+    console.log("Before redux-counter", performance.now());
   }
 
   addUser = () => {
     this.props.updateUsers({ ["4-0"]: { ...this.props.users["4-0"], name: "asdf", favorites: { color: "blue" } } });
-  };
-
-  renderItem = (item, index) => {
-    return <ListRow item={item} index={index} />;
   };
 
   render() {
@@ -195,11 +200,7 @@ class ReduxCounter extends React.Component {
         {/* {Object.values(users).map(user => {
           return <ListRow key={user.id} item={user} />;
         })} */}
-        <FlatList
-          data={Object.values(users)}
-          customClass=""
-          renderItem={this.renderItem}
-        />
+        <FlatList data={Object.values(users)} customClass="" renderItem={(item) => <ListRow item={item} />} />
       </div>
     );
   }
