@@ -12,11 +12,11 @@ class FlatList extends React.Component {
     {console.log("After redux-counter",performance.now())}
   }
   render() {
-    const { data, renderItem, customClass, itemKey } = this.props;
+    const { data, renderItem, customClass = "", itemKey = "id" } = this.props;
     return (
-      <div className={`list-container ${customClass}`}>
+      <div className={`${customClass}`}>
         {data.map(item => (
-          <ItemRenderer key={`List-${itemKey}`} item={item} renderItem={renderItem} />
+          <ItemRenderer key={`List-${item[itemKey]}`} item={item} renderItem={renderItem} />
         ))}
       </div>
     );
