@@ -10,7 +10,7 @@ const ItemRenderer = React.memo(({ item, renderItem }) => renderItem(item), item
 class FlatList extends React.Component {
   render() {
     const { data, renderItem, customClass = "", itemKey = "id" } = this.props;
-    return data.map(item => <ItemRenderer key={`List-${item[itemKey]}`} item={item} renderItem={renderItem} />);
+    return data.map(item => <ItemRenderer key={`List-${typeof item == "object" ? item[itemKey] : item}`}  item={item} renderItem={renderItem} />);
   }
 }
 
