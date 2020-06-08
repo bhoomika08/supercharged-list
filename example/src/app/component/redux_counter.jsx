@@ -174,7 +174,6 @@ class ReduxCounter extends React.Component {
     }
     console.log("data2 :>> ", data2);
     this.props.updateUsers(GenerateUserData(data2));
-    console.log("Before redux-counter", performance.now());
   }
 
   addUser = () => {
@@ -197,10 +196,7 @@ class ReduxCounter extends React.Component {
           </button>
         </div>
         <button onClick={this.addUser}>Add user</button>
-        {/* {Object.values(users).map(user => {
-          return <ListRow key={user.id} item={user} />;
-        })} */}
-        <FlatList data={Object.values(users)} customClass="" renderItem={(item) => <ListRow item={item} />} />
+        <FlatList data={Object.values(users)} isVirtual batchCount={70} renderItem={(item) => <ListRow item={item} />} />
       </div>
     );
   }
