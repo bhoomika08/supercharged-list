@@ -172,7 +172,6 @@ class ReduxCounter extends React.Component {
       });
       data2 = [...data2, ...refData];
     }
-    console.log("data2 :>> ", data2);
     this.props.updateUsers(GenerateUserData(data2));
   }
 

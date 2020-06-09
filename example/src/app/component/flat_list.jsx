@@ -1,8 +1,6 @@
 import React from "react";
 import isEqual from "lodash.isequal";
 
-const defaultBatchCount = 50;
-
 const itemChecker = (prevProps, nextProps) => {
   return isEqual(prevProps, nextProps);
 };
@@ -15,22 +13,23 @@ class FlatList extends React.Component {
     this.state = {
       items: []
     };
-    this.timeout;
   }
 
   componentDidMount() {
-    const { data, batchCount = defaultBatchCount, isVirtual = false } = this.props;
-    this.setState({
-      items: isVirtual ? data.slice(0, batchCount) : data
-    });
+    const { data, batchCount, isVirtual } = this.props;
+    if(isVirtual) {
+      this.setState({
+        items: data.slice(0, batchCount)
+      });
+    }
   }
 
   componentDidUpdate({ data: oldData }) {
-    const { data, batchCount = defaultBatchCount } = this.props;
+    const { data, batchCount, isVirtual } = this.props;
     const { items } = this.state;
 
-    if (oldData.length == data.length) {
-      if (itemChecker({ data: oldData }, { data })) {
+    if (isVirtual) {
+      if (oldData.length == data.length && itemChecker({ data: oldData }, { data })) {
         clearTimeout(this.timeoutId);
         const hasMore =
           items.length + batchCount <= data.length ||
@@ -45,15 +44,13 @@ class FlatList extends React.Component {
       } else {
         this.setState({ items: [] });
       }
-    } else {
-      this.setState({ items: [] });
     }
   }
 
   render() {
-    const { renderItem, itemKey = "id" } = this.props;
+    const { data, renderItem, itemKey, isVirtual } = this.props;
     const { items } = this.state;
-    return items.map(item => (
+    return (isVirtual ? items : data).map(item => (
       <ItemRenderer
         key={`List-${typeof item == "object" ? item[itemKey] : item}`}
         item={item}
@@ -62,5 +59,11 @@ class FlatList extends React.Component {
     ));
   }
 }
+
+FlatList.defaultProps = {
+  batchCount: 50,
+  itemKey: "id",
+  isVirtual: false
+};
 
 export default FlatList;
