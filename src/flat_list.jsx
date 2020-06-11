@@ -1,6 +1,8 @@
 import React from "react";
 import isEqual from "lodash.isequal";
 
+const timeoutMilliSec = 10;
+
 const itemChecker = (prevProps, nextProps) => {
   return isEqual(prevProps, nextProps);
 };
@@ -39,7 +41,7 @@ class FlatList extends React.Component {
             this.setState(prevState => ({
               items: [...items, ...data.slice(prevState.items.length, prevState.items.length + batchCount)]
             }));
-          }, 100);
+          }, timeoutMilliSec);
         }
       } else {
         this.setState({ items: [] });
