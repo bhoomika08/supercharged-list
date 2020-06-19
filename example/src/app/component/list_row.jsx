@@ -4,11 +4,11 @@ class ListRow extends React.Component {
   render() {
     const { item } = this.props;
     return (
-      <div className="container">
-        <span>{item.id}</span>
-        <span>{item.name}</span>
-        <span>{item.favorites.color}</span>
-      </div>
+      <tr className="container">
+        <td>{item.id}</td>
+        <td>{item.name}</td>
+        <td>{item.favorites.color}</td>
+      </tr>
     );
   }
 };

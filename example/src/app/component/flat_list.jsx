@@ -1,6 +1,8 @@
 import React from "react";
 import isEqual from "lodash.isequal";
 
+const timeoutMilliSec = 0;
+
 const itemChecker = (prevProps, nextProps) => {
   return isEqual(prevProps, nextProps);
 };
@@ -13,49 +15,84 @@ class FlatList extends React.Component {
     this.state = {
       items: []
     };
+    this.lastItem = React.createRef();
+    this.loadMoreItems = this.loadMoreItems.bind(this);
   }
 
   componentDidMount() {
-    const { data, batchCount, isVirtual } = this.props;
-    if(isVirtual) {
+    const { data, batchCount, isVirtual, isScroll, scrollParent } = this.props;
+    const { items } = this.state;
+
+    if (isVirtual) {
       this.setState({
         items: data.slice(0, batchCount)
+      });
+    } else if (isScroll) {
+      if (data.length > 0 && items.length == 0)
+        this.setState({
+          items: data.slice(0, batchCount)
+        });
+      const parent = scrollParent ? document.querySelector(scrollParent) : window;
+      const parentHeight = scrollParent ? parent.clientHeight : window.innerHeight;
+      parent.addEventListener("scroll", () => {
+        if (this.lastItem.current.getBoundingClientRect().bottom - 300 <= parentHeight) {
+          this.loadMoreItems();
+        }
       });
     }
   }
 
   componentDidUpdate({ data: oldData }) {
-    const { data, batchCount, isVirtual } = this.props;
+    const { data, batchCount, isVirtual, isScroll } = this.props;
     const { items } = this.state;
 
     if (isVirtual) {
       if (oldData.length == data.length && itemChecker({ data: oldData }, { data })) {
-        clearTimeout(this.timeoutId);
-        const hasMore =
-          items.length + batchCount <= data.length ||
-          (data.length - items.length <= batchCount && data.length !== items.length);
-        if (hasMore) {
-          this.timeoutId = setTimeout(() => {
-            this.setState(prevState => ({
-              items: [...items, ...data.slice(prevState.items.length, prevState.items.length + batchCount)]
-            }));
-          }, 100);
-        }
+        this.loadMoreItems();
+      } else {
+        this.setState({ items: [] });
+      }
+    } else if (isScroll) {
+      if (oldData.length == data.length && itemChecker({ data: oldData }, { data })) {
+        if (items.length == 0)
+          this.setState({
+            items: data.slice(0, batchCount)
+          });
       } else {
         this.setState({ items: [] });
       }
     }
   }
 
-  render() {
-    const { data, renderItem, itemKey, isVirtual } = this.props;
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.handleOnScroll);
+  }
+
+  loadMoreItems() {
+    const { data, batchCount } = this.props;
     const { items } = this.state;
-    return (isVirtual ? items : data).map(item => (
-      <ItemRenderer
-        key={`List-${typeof item == "object" ? item[itemKey] : item}`}
-        item={item}
-        renderItem={renderItem}
-      />
+    clearTimeout(this.timeoutId);
+    const hasMore =
+      items.length + batchCount <= data.length ||
+      (data.length - items.length <= batchCount && data.length !== items.length);
+    if (hasMore) {
+      this.timeoutId = setTimeout(() => {
+        this.setState(prevState => ({
+          items: [...items, ...data.slice(prevState.items.length, prevState.items.length + batchCount)]
+        }));
+      }, timeoutMilliSec);
+    }
+  }
+
+  render() {
+    const { data, renderItem, itemKey, isVirtual, isScroll } = this.props;
+    const { items } = this.state;
+    const lastIndex = items.length - 1;
+    return (isVirtual || isScroll ? items : data).map((item, idx) => (
+      <React.Fragment key={`List-${typeof item == "object" ? item[itemKey] : item}`}>
+        <ItemRenderer item={item} renderItem={renderItem} />
+        {idx == lastIndex && <tr ref={this.lastItem}></tr>}
+      </React.Fragment>
     ));
   }
 }

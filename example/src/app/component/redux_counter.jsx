@@ -195,7 +195,25 @@ class ReduxCounter extends React.Component {
           </button>
         </div>
         <button onClick={this.addUser}>Add user</button>
-        <FlatList data={Object.values(users)} isVirtual batchCount={70} renderItem={(item) => <ListRow item={item} />} />
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Color</th>
+              </tr>
+            </thead>
+            <tbody data-scroll-parent="scroll-parent">
+              <FlatList
+                data={Object.values(users)}
+                isScroll
+                batchCount={50}
+                renderItem={item => <ListRow item={item} />}
+              />
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
