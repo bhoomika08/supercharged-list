@@ -204,11 +204,12 @@ class ReduxCounter extends React.Component {
                 <th>Color</th>
               </tr>
             </thead>
-            <tbody data-scroll-parent="scroll-parent">
+            <tbody>
               <FlatList
                 data={Object.values(users)}
                 isScroll
                 batchCount={50}
+                ListItemType="tr"
                 renderItem={item => <ListRow item={item} />}
               />
             </tbody>

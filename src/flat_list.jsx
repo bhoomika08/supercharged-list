@@ -85,13 +85,13 @@ class FlatList extends React.Component {
   }
 
   render() {
-    const { data, renderItem, itemKey, isVirtual, isScroll } = this.props;
+    const { data, renderItem, itemKey, isVirtual, isScroll, ListItemType } = this.props;
     const { items } = this.state;
     const lastIndex = items.length - 1;
     return (isVirtual || isScroll ? items : data).map((item, idx) => (
       <React.Fragment key={`List-${typeof item == "object" ? item[itemKey] : item}`}>
         <ItemRenderer item={item} renderItem={renderItem} />
-        {idx == lastIndex && <tr ref={this.lastItem}></tr>}
+        {idx == lastIndex && <ListItemType ref={this.lastItem}></ListItemType>}
       </React.Fragment>
     ));
   }
@@ -100,7 +100,8 @@ class FlatList extends React.Component {
 FlatList.defaultProps = {
   batchCount: 50,
   itemKey: "id",
-  isVirtual: false
+  isVirtual: false,
+  ListItemType: "span"
 };
 
 export default FlatList;
