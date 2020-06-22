@@ -101,6 +101,7 @@ FlatList.defaultProps = {
   batchCount: 50,
   itemKey: "id",
   isVirtual: false,
+  isScroll: false,
   ListItemType: "span"
 };
 
