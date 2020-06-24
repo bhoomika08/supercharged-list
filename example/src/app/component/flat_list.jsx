@@ -15,8 +15,9 @@ class FlatList extends React.Component {
     this.state = {
       items: []
     };
-    this.lastItem = React.createRef();
+    this.lastItemRef = React.createRef();
     this.loadMoreItems = this.loadMoreItems.bind(this);
+    this.scrollToElement = this.scrollToElement.bind(this);
   }
 
   componentDidMount() {
@@ -28,14 +29,15 @@ class FlatList extends React.Component {
         items: data.slice(0, batchCount)
       });
     } else if (isScroll) {
-      if (data.length > 0 && items.length == 0)
+      if (data.length > 0 && items.length == 0) {
         this.setState({
           items: data.slice(0, batchCount)
         });
+      }
       const parent = scrollParent ? document.querySelector(scrollParent) : window;
       const parentHeight = scrollParent ? parent.clientHeight : window.innerHeight;
       parent.addEventListener("scroll", () => {
-        if (this.lastItem.current.getBoundingClientRect().bottom - 300 <= parentHeight) {
+        if (this.lastItemRef.current.getBoundingClientRect().bottom - 300 <= parentHeight) {
           this.loadMoreItems();
         }
       });
@@ -43,9 +45,8 @@ class FlatList extends React.Component {
   }
 
   componentDidUpdate({ data: oldData }) {
-    const { data, batchCount, isVirtual, isScroll } = this.props;
+    const { data, batchCount, isVirtual, isScroll, itemToScrollPosition } = this.props;
     const { items } = this.state;
-
     if (isVirtual) {
       if (oldData.length == data.length && itemChecker({ data: oldData }, { data })) {
         this.loadMoreItems();
@@ -60,6 +61,13 @@ class FlatList extends React.Component {
           });
       } else {
         this.setState({ items: [] });
+      }
+    }
+    if (itemToScrollPosition >= 0 && itemToScrollPosition != null) {
+      if (itemToScrollPosition > items.length) {
+        this.loadMoreItems();
+      } else {
+        this.scrollToElement(itemToScrollPosition);
       }
     }
   }
@@ -84,6 +92,18 @@ class FlatList extends React.Component {
     }
   }
 
+  scrollToElement(itemPosition) {
+    const { onScrollEnd } = this.props;
+    const { items } = this.state;
+    const referenceElement = itemPosition == items.length - 1 ? this.lastItemRef.current : this.refs[`Ref-${itemPosition}`];
+    clearTimeout(this.scrollEnd);
+    referenceElement.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+    this.scrollEnd = setTimeout(() => onScrollEnd(), 3000);
+  }
+
   render() {
     const { data, renderItem, itemKey, isVirtual, isScroll, ListItemType } = this.props;
     const { items } = this.state;
@@ -91,7 +111,7 @@ class FlatList extends React.Component {
     return (isVirtual || isScroll ? items : data).map((item, idx) => (
       <React.Fragment key={`List-${typeof item == "object" ? item[itemKey] : item}`}>
         <ItemRenderer item={item} renderItem={renderItem} />
-        {idx == lastIndex && <ListItemType ref={this.lastItem}></ListItemType>}
+        <ListItemType ref={lastIndex == idx ? this.lastItemRef : `Ref-${idx}`}></ListItemType>
       </React.Fragment>
     ));
   }
@@ -102,7 +122,9 @@ FlatList.defaultProps = {
   itemKey: "id",
   isVirtual: false,
   isScroll: false,
-  ListItemType: "span"
+  ListItemType: "span",
+  itemToScrollPosition: null,
+  onScrollEnd: () => {}
 };
 
 export default FlatList;
