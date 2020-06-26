@@ -135,7 +135,7 @@ class FlatList extends React.Component {
     return (autoLoad || loadOnScroll ? items : data).map((item, idx) => (
       <React.Fragment key={`List-${this.getKey(item)}`}>
         <ItemRenderer item={item} renderItem={renderItem} />
-        <SeparatorType ref={`separator-ref-${this.getKey(item)}`} />
+        {loadOnScroll && <SeparatorType ref={`separator-ref-${this.getKey(item)}`} />}
       </React.Fragment>
     ));
   }
