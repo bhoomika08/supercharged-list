@@ -7,7 +7,15 @@ const itemChecker = (prevProps, nextProps) => {
   return isEqual(prevProps, nextProps);
 };
 
-const ItemRenderer = React.memo(({ item, renderItem }) => renderItem(item), itemChecker);
+class ItemRenderer extends React.Component {
+  shouldComponentUpdate() {
+    return !itemChecker();
+  }
+  render() {
+    const { item, renderItem } = this.props;
+    return renderItem(item);
+  }
+}
 
 class FlatList extends React.Component {
   constructor(props) {
