@@ -7,9 +7,13 @@ const itemChecker = (prevProps, nextProps) => {
   return isEqual(prevProps, nextProps);
 };
 
+const getKey = (item, itemKey) => {
+  return typeof item == "object" ? item[itemKey] : item;
+};
+
 class ItemRenderer extends React.Component {
-  shouldComponentUpdate() {
-    return !itemChecker();
+  shouldComponentUpdate(nextProps) {
+    return !itemChecker(this.props.item, nextProps.item);
   }
   render() {
     const { item, renderItem } = this.props;
@@ -23,27 +27,23 @@ class FlatList extends React.Component {
     this.state = {
       items: []
     };
+    this.getFirstBatchOfItems = this.getFirstBatchOfItems.bind(this);
     this.getLastElementHeight = this.getLastElementHeight.bind(this);
-    this.getKey = this.getKey.bind(this);
     this.loadMoreItems = this.loadMoreItems.bind(this);
     this.scrollToItem = this.scrollToItem.bind(this);
   }
 
   componentDidMount() {
-    const { data, batchCount, autoLoad, loadOnScroll, scrollParent } = this.props;
+    const { data, autoLoad, loadOnScroll, scrollParent } = this.props;
     const { items } = this.state;
 
     if (autoLoad) {
       if (data.length > 0) {
-        this.setState({
-          items: data.slice(0, batchCount)
-        });
+        this.getFirstBatchOfItems();
       }
     } else if (loadOnScroll) {
       if (data.length > 0 && items.length == 0) {
-        this.setState({
-          items: data.slice(0, batchCount)
-        });
+        this.getFirstBatchOfItems();
       }
       const parent = scrollParent ? document.querySelector(scrollParent) : window;
       const parentHeight = scrollParent ? parent.clientHeight : window.innerHeight;
@@ -56,25 +56,19 @@ class FlatList extends React.Component {
   }
 
   componentDidUpdate({ data: oldData }) {
-    const { data, batchCount, autoLoad, loadOnScroll, positionToScroll } = this.props;
+    const { data, autoLoad, loadOnScroll, positionToScroll } = this.props;
     const { items } = this.state;
 
-    //---------- To Load Items Automatically -----------//
-    if (autoLoad) {
+    if (autoLoad || loadOnScroll) {
       if (oldData.length == data.length && itemChecker({ data: oldData }, { data })) {
-        this.loadMoreItems();
-      } else {
-        this.setState({ items: [] });
-      }
-    }
-
-    //---------- To Load first batch of Items if items length is 0 before scrolling ---------//
-    else if (loadOnScroll) {
-      if (oldData.length == data.length && itemChecker({ data: oldData }, { data })) {
-        if (items.length == 0)
-          this.setState({
-            items: data.slice(0, batchCount)
-          });
+        //---------- To Load Items Automatically -----------//
+        if (autoLoad) {
+          this.loadMoreItems();
+        }
+        //---------- To Load first batch of Items if items length is 0 before scrolling ---------//
+        else if (loadOnScroll && items.length == 0) {
+          this.getFirstBatchOfItems();
+        }
       } else {
         this.setState({ items: [] });
       }
@@ -94,14 +88,17 @@ class FlatList extends React.Component {
     window.removeEventListener("scroll", this.handleOnScroll);
   }
 
-  getLastElementHeight() {
-    const { items } = this.state;
-    return this.refs[`separator-ref-${this.getKey(items[items.length - 1])}`].getBoundingClientRect().bottom;
+  getFirstBatchOfItems() {
+    const { data, batchCount } = this.props;
+    this.setState({
+      items: data.slice(0, batchCount)
+    });
   }
 
-  getKey(item) {
+  getLastElementHeight() {
     const { itemKey } = this.props;
-    return typeof item == "object" ? item[itemKey] : item;
+    const { items } = this.state;
+    return this.refs[`separator-ref-${getKey(items[items.length - 1], itemKey)}`].getBoundingClientRect().bottom;
   }
 
   loadMoreItems() {
@@ -119,8 +116,8 @@ class FlatList extends React.Component {
   }
 
   scrollToItem(item) {
-    const { onScrollToElementEnd } = this.props;
-    const referenceElement = this.refs[`separator-ref-${this.getKey(item)}`];
+    const { onScrollToElementEnd, itemKey } = this.props;
+    const referenceElement = this.refs[`separator-ref-${getKey(item, itemKey)}`];
     clearTimeout(this.scrollEnd);
     referenceElement.scrollIntoView({
       behavior: "smooth",
@@ -130,12 +127,16 @@ class FlatList extends React.Component {
   }
 
   render() {
-    const { data, renderItem, autoLoad, loadOnScroll, SeparatorType } = this.props;
+    const { data, renderItem, autoLoad, loadOnScroll, isTabular, itemKey } = this.props;
     const { items } = this.state;
-    return (autoLoad || loadOnScroll ? items : data).map((item, idx) => (
-      <React.Fragment key={`List-${this.getKey(item)}`}>
+    return (autoLoad || loadOnScroll ? items : data).map(item => (
+      <React.Fragment key={`List-${getKey(item, itemKey)}`}>
         <ItemRenderer item={item} renderItem={renderItem} />
-        {loadOnScroll && <SeparatorType ref={`separator-ref-${this.getKey(item)}`} />}
+        {isTabular ? (
+          <tr ref={`separator-ref-${getKey(item, itemKey)}`} />
+        ) : (
+          <span ref={`separator-ref-${getKey(item, itemKey)}`} />
+        )}
       </React.Fragment>
     ));
   }
@@ -146,7 +147,7 @@ FlatList.defaultProps = {
   itemKey: "id",
   autoLoad: false,
   loadOnScroll: false,
-  SeparatorType: "span",
+  isTabular: false,
   positionToScroll: null,
   onScrollToElementEnd: () => {}
 };

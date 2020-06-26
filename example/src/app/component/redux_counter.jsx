@@ -207,9 +207,10 @@ class ReduxCounter extends React.Component {
             <tbody>
               <FlatList
                 data={Object.values(users)}
-                isScroll
+                loadOnScroll
+                itemKey="id"
                 batchCount={50}
-                ListItemType="tr"
+                isTabular
                 renderItem={item => <ListRow item={item} />}
               />
             </tbody>
