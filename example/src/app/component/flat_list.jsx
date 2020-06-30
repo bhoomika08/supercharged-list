@@ -58,19 +58,26 @@ class FlatList extends React.Component {
   componentDidUpdate({ data: oldData }) {
     const { data, autoLoad, loadOnScroll, positionToScroll } = this.props;
     const { items } = this.state;
-
     if (autoLoad || loadOnScroll) {
-      if (oldData.length == data.length && itemChecker({ data: oldData }, { data })) {
-        //---------- To Load Items Automatically -----------//
-        if (autoLoad) {
-          this.loadMoreItems();
-        }
-        //---------- To Load first batch of Items if items length is 0 before scrolling ---------//
-        else if (loadOnScroll && items.length == 0) {
-          this.getFirstBatchOfItems();
+      if (oldData.length == data.length) {
+        if (itemChecker({ data: oldData }, { data })) {
+          //---------- To Load Items Automatically -----------//
+          if (autoLoad) {
+            this.loadMoreItems();
+          }
+          //---------- To Load first batch of Items if items length is 0 before scrolling ---------//
+          else if (loadOnScroll && data.length > 0 && items.length == 0) {
+            this.getFirstBatchOfItems();
+          }
+        } else {
+          this.setState({
+            items: data.slice(0, items.length)
+          });
         }
       } else {
-        this.setState({ items: [] });
+        this.setState({
+          items: []
+        });
       }
     }
 

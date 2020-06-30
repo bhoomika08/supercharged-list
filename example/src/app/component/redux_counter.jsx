@@ -149,6 +149,10 @@ const usersData = [
 ];
 
 class ReduxCounter extends React.Component {
+  constructor(props) {
+    super(props);
+    this.renderItem = this.renderItem.bind(this);
+  }
   componentWillMount() {
     let data2 = [];
     for (let i = 0; i < 50; i++) {
@@ -178,6 +182,10 @@ class ReduxCounter extends React.Component {
   addUser = () => {
     this.props.updateUsers({ ["4-0"]: { ...this.props.users["4-0"], name: "asdf", favorites: { color: "blue" } } });
   };
+
+  renderItem(item) {
+    return <ListRow item={item} />;
+  }
 
   render() {
     const users = GenerateUserData(this.props.users || []);
@@ -211,7 +219,7 @@ class ReduxCounter extends React.Component {
                 itemKey="id"
                 batchCount={50}
                 isTabular
-                renderItem={item => <ListRow item={item} />}
+                renderItem={this.renderItem}
               />
             </tbody>
           </table>
