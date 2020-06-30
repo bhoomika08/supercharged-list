@@ -6,25 +6,25 @@ A High Performance List for React Applications.
 
 A memoized component which means that it will not re-render if props remain shallow-equal. But here come a twist, if the prop in list is an object and its content remain same, then also it will re-render as it will not remain shallow-equal due to different memory assigned to objects. So here comes the supercharged-list to overcome this situation. In this it will perform the diff checker of the previous and next props object. It will render only if there is diffrence in the content of object. This will not re-render the entire list with props as object.
 
-The List could be rendered in either of 3 ways:
+### The List could be rendered in either of 3 ways:
 
-1. Entire List to be rendered in one go. (autoLoad=false && loadOnScroll=false)
+1. <b>Default Behaviour:</b> Entire List to be rendered in one go. (autoLoad=false && loadOnScroll=false) 
 2. The List items rendered in batches automatically. (autoLoad=true)
 3. The List Items rendered in batches on scrolling. (loadOnScroll=true)
 
-Features:
+### Features:
 
 1. Diff checker to render only those list items whose props is changed.
 2. Can scroll to a particular List Item in the List to be rendered.
 
 ## Install
 
+With npm:
 ```bash
 npm install --save supercharged-list
 ```
 
 or with yarn:
-
 ```bash
 yarn add supercharged-list
 ```
@@ -86,11 +86,13 @@ class Example extends React.Component {
 }
 ```
 
-## Browsers support
+## React Dependency
+lodash.isequal: "^4.5.0"
 
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Safari |
-| --- | --- | --- |
-| last 2 versions | last 2 versions | last 2 versions |
+## Versions required
+node version : >=10 <br/>
+react: "^16.0.0"
+ 
 
 ## Contributors ✨
 #### Bhoomika Gupta

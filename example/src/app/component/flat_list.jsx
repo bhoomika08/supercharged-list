@@ -1,15 +1,13 @@
 import React from "react";
 import isEqual from "lodash.isequal";
 
-const timeoutMilliSec = 0;
+const loadMoreTimeout = 0;
+const heightFromBottom = 300;
+const scrollEndTimeout = 3000;
 
-const itemChecker = (prevProps, nextProps) => {
-  return isEqual(prevProps, nextProps);
-};
+const itemChecker = (prevProps, nextProps) => isEqual(prevProps, nextProps);
 
-const getKey = (item, itemKey) => {
-  return typeof item == "object" ? item[itemKey] : item;
-};
+const getKey = (item, itemKey) => typeof item == "object" ? item[itemKey] : item;
 
 class ItemRenderer extends React.Component {
   shouldComponentUpdate(nextProps) {
@@ -48,7 +46,7 @@ class FlatList extends React.Component {
       const parent = scrollParent ? document.querySelector(scrollParent) : window;
       const parentHeight = scrollParent ? parent.clientHeight : window.innerHeight;
       parent.addEventListener("scroll", () => {
-        if (this.getLastElementHeight() - 300 <= parentHeight) {
+        if (this.getLastElementHeight() - heightFromBottom <= parentHeight) {
           this.loadMoreItems();
         }
       });
@@ -118,7 +116,7 @@ class FlatList extends React.Component {
         this.setState(prevState => ({
           items: [...items, ...data.slice(prevState.items.length, prevState.items.length + batchCount)]
         }));
-      }, timeoutMilliSec);
+      }, loadMoreTimeout);
     }
   }
 
@@ -130,7 +128,7 @@ class FlatList extends React.Component {
       behavior: "smooth",
       block: "center"
     });
-    this.scrollEnd = setTimeout(onScrollToElementEnd, 3000);
+    this.scrollEnd = setTimeout(onScrollToElementEnd, scrollEndTimeout);
   }
 
   render() {
