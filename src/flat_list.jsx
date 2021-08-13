@@ -109,7 +109,7 @@ class FlatList extends React.Component {
   }
 
   loadMoreItems() {
-    const { data, batchCount, onScrollToEnd = () => { } } = this.props;
+    const { data, batchCount, onScrollToEnd } = this.props;
     const { items } = this.state;
     clearTimeout(this.timeoutId);
     const hasMore = data.length - items.length > 0;
@@ -159,7 +159,8 @@ FlatList.defaultProps = {
   loadOnScroll: false,
   isTabular: false,
   positionToScroll: null,
-  onScrollToElementEnd: () => { }
+  onScrollToElementEnd: () => {},
+  onScrollToEnd: () => {}
 };
 
 export default FlatList;
