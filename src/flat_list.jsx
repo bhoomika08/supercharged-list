@@ -1,6 +1,5 @@
 import React from "react";
 import isEqual from "lodash.isequal";
-
 const loadMoreTimeout = 0;
 const heightFromBottom = 300;
 const scrollEndTimeout = 3000;
@@ -103,20 +102,26 @@ class FlatList extends React.Component {
   getLastElementHeight() {
     const { itemKey } = this.props;
     const { items } = this.state;
-    return this.refs[`separator-ref-${getKey(items[items.length - 1], itemKey)}`].getBoundingClientRect().bottom;
+    const element = this.refs[`separator-ref-${getKey(items[items.length - 1], itemKey)}`];
+    if (element && typeof element.getBoundingClientRect == "function") {
+      return element.getBoundingClientRect().bottom;
+    }
   }
 
   loadMoreItems() {
-    const { data, batchCount } = this.props;
+    const { data, batchCount, onScrollToEnd = () => { } } = this.props;
     const { items } = this.state;
     clearTimeout(this.timeoutId);
     const hasMore = data.length - items.length > 0;
+    const equalData = data.length - items.length == 0;
     if (hasMore) {
       this.timeoutId = setTimeout(() => {
         this.setState(prevState => ({
           items: [...items, ...data.slice(prevState.items.length, prevState.items.length + batchCount)]
         }));
       }, loadMoreTimeout);
+    } else if (equalData) {
+      onScrollToEnd();
     }
   }
 
@@ -154,7 +159,7 @@ FlatList.defaultProps = {
   loadOnScroll: false,
   isTabular: false,
   positionToScroll: null,
-  onScrollToElementEnd: () => {}
+  onScrollToElementEnd: () => { }
 };
 
 export default FlatList;
